@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/junks/react-three-city/static/css/main.20dd625e.css",
-    "main.js": "/junks/react-three-city/static/js/main.f8ccdd0f.js",
-    "static/js/453.b007e51c.chunk.js": "/junks/react-three-city/static/js/453.b007e51c.chunk.js",
-    "index.html": "/junks/react-three-city/index.html",
-    "main.20dd625e.css.map": "/junks/react-three-city/static/css/main.20dd625e.css.map",
-    "main.f8ccdd0f.js.map": "/junks/react-three-city/static/js/main.f8ccdd0f.js.map",
-    "453.b007e51c.chunk.js.map": "/junks/react-three-city/static/js/453.b007e51c.chunk.js.map"
+    "main.css": "/Junks/react-three-city/static/css/main.20dd625e.css",
+    "main.js": "/Junks/react-three-city/static/js/main.e631a492.js",
+    "static/js/453.b007e51c.chunk.js": "/Junks/react-three-city/static/js/453.b007e51c.chunk.js",
+    "index.html": "/Junks/react-three-city/index.html",
+    "main.20dd625e.css.map": "/Junks/react-three-city/static/css/main.20dd625e.css.map",
+    "main.e631a492.js.map": "/Junks/react-three-city/static/js/main.e631a492.js.map",
+    "453.b007e51c.chunk.js.map": "/Junks/react-three-city/static/js/453.b007e51c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.20dd625e.css",
-    "static/js/main.f8ccdd0f.js"
+    "static/js/main.e631a492.js"
   ]
 }
