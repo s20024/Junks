@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Junks/business-card/static/css/main.1d48046e.css",
+    "main.js": "/Junks/business-card/static/js/main.599905d2.js",
+    "static/js/453.1407b060.chunk.js": "/Junks/business-card/static/js/453.1407b060.chunk.js",
+    "index.html": "/Junks/business-card/index.html",
+    "main.1d48046e.css.map": "/Junks/business-card/static/css/main.1d48046e.css.map",
+    "main.599905d2.js.map": "/Junks/business-card/static/js/main.599905d2.js.map",
+    "453.1407b060.chunk.js.map": "/Junks/business-card/static/js/453.1407b060.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1d48046e.css",
+    "static/js/main.599905d2.js"
+  ]
+}

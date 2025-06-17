@@ -12,3 +12,7 @@ React と Three.js の練習
 
 Vue3 と ElementPlus の練習  
 Apple端末の一覧表示(iPhone)。*iPadも追加予定だが、、、、めんどいのでやるかどうかはわからず。
+
+## [Business Card](https://s20024.github.io/Junks/business-card)
+
+s20024(やら)の名刺を表示しただけです。w
