@@ -16,3 +16,7 @@ Apple端末の一覧表示(iPhone)。*iPadも追加予定だが、、、、め�
 ## [Business Card](https://s20024.github.io/Junks/business-card)
 
 s20024(やら)の名刺を表示しただけです。w
+
+## [coding-introduction](https://s20024.github.io/Junks/coding-introduction)
+
+なんなんでしょう。。。?

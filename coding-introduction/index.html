@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>タイピング風自己紹介</title>
+    <style>
+      body {
+        font-family: "Fira Code", Consolas, monospace;
+        font-size: 18px;
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        padding: 40px;
+      }
+      #textDisplay {
+        padding: 20px;
+        border-left: 4px solid #007acc;
+        position: relative;
+      }
+      .line {
+        position: relative;
+        padding-left: 40px;
+        min-height: 1.5em;
+        display: block;
+      }
+      .line::before {
+        content: attr(data-line-number);
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: #858585;
+        width: 30px;
+        text-align: right;
+      }
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 1em;
+        background-color: #d4d4d4;
+        animation: blink 1s step-end infinite;
+        vertical-align: bottom;
+      }
+      .tag {
+        color: #8f8f8f;
+      }
+      .text {
+        color: #ffffff;
+      }
+      .keyword {
+        color: #c586c0;
+      }
+      .string {
+        color: #ce9178;
+      }
+      .comment {
+        color: #6a9955;
+      }
+      .function {
+        color: #dcdcaa;
+      }
+      .light-yellow {
+        color: #ebebaf;
+      }
+      .yellow {
+        color: #ffd700;
+      }
+      .function-name {
+        color: #569cd6;
+      }
+      .html-element {
+        color: #569cd6;
+      }
+      .import-item {
+        color: #b6ddf0;
+      }
+      .fragment-tag {
+        color: #8f8f8f;
+      }
+      .component-tag {
+        color: #4ec9b0;
+      }
+      .url-text {
+        color: #ffffff;
+        text-decoration: underline;
+      }
+      .bracket {
+        color: #d4d4d4;
+      }
+
+      @keyframes blink {
+        from,
+        to {
+          background: transparent;
+        }
+        50% {
+          background: #d4d4d4;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2 style="color: #d4d4d4">タイピング風自己紹介</h2>
+    <div id="textDisplay" data-line-number="1">
+      <div class="line" data-line-number="1">
+        <span id="currentLine"></span><span class="cursor"></span>
+      </div>
+    </div>
+
+    <script>
+      const jsxLines = [
+        { type: "import", text: 'import { Image, Name, Code, Mail, Links, Github, TwitterX, Address, Portfolio, Description } from "./ProfileComponents";' },
+        { type: "blank" },
+        { type: "function", text: "export function Profile() {" },
+        { type: "indent", text: "return (" },
+        { type: "double-indent-fragment", tag: "", text: "" },
+        { type: "triple-indent", tag: "Image", attr: 'src="s20024.png"', tagType: "self-closing" },
+        { type: "triple-indent", text: "{/*   やら ゆうと   */}", tagType: "comment" },
+        { type: "triple-indent", tag: "Name", text: "屋良  祐利" },
+        { type: "triple-indent", tag: "Code", text: "s20024" },
+        { type: "blank" },
+        { type: "triple-indent", tag: "Address", text: "沖縄県 那覇市" },
+        { type: "triple-indent", tag: "Mail", text: "s20024@std.it-college.ac.jp" },
+        { type: "triple-indent", tag: "Description", tagType: "multiline", lines: [
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;フロントエンドエンジニアです。バックエンドもたまにしています。<br />",
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;インフラは、全くできません。。。w<br />",
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;将来の夢は、",
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;お客さんの少ないカフェを経営しながら、空いた時間でプログラマーとして仕事をし、のんびりと暮らすことです。",
+          "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+        ]},
+        { type: "blank" },
+        { type: "triple-indent", tag: "Links", tagType: "container" },
+        { type: "quad-indent", tag: "Github", text: "https://github.com/s20024" },
+        { type: "quad-indent", tag: "TwitterX", text: "https://x.com/s20024itcollege" },
+        { type: "quad-indent", tag: "Portfolio", text: "https://portfolio.s20024.com" },
+        { type: "triple-indent", text: "</Links>", tagType: "closing" },
+        { type: "double-indent-fragment-closing", text: "</>", tagType: "closing" },
+        { type: "indent", text: ");" },
+        { type: "function", text: "};" },
+        { type: "blank" },
+      ];
+
+      const displayEl = document.getElementById("textDisplay");
+      const cursorEl = document.querySelector(".cursor");
+      let lineIndex = 0;
+      let charIndex = 0;
+      let phase = "typing";
+      let currentLineEl = document.getElementById("currentLine");
+      let multilineIndex = 0; // 複数行テキスト用のインデックス
+      let actualLineNumber = 1; // 実際の表示行番号
+
+      function getIndent(type) {
+        if (type === "quad-indent") return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        if (type === "triple-indent") return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        if (type === "double-indent") return "&nbsp;&nbsp;&nbsp;&nbsp;";
+        if (type === "indent") return "&nbsp;&nbsp;";
+        return "";
+      }
+
+      function typeJSX() {
+        if (lineIndex >= jsxLines.length) return;
+        const current = jsxLines[lineIndex];
+
+        if (current.type === "blank") {
+          // 空行の処理
+          currentLineEl.innerHTML = "";
+          charIndex = 0;
+          lineIndex++;
+          
+          // 次の行を作成
+          if (lineIndex < jsxLines.length) {
+            createNewLine();
+            return;
+          }
+        } else if (current.type === "import") {
+          // import文の処理
+          if (charIndex < current.text.length) {
+            const remainingText = current.text.substring(charIndex);
+            let className = "text";
+            let charToAdd = remainingText[0];
+            let charsToSkip = 1;
+            
+            // 現在の位置が{}内かどうかを判定
+            const beforeCursor = current.text.substring(0, charIndex);
+            const afterCursor = current.text.substring(charIndex);
+            const openBrace = beforeCursor.lastIndexOf('{');
+            const closeBrace = afterCursor.indexOf('}');
+            const isInBraces = openBrace !== -1 && closeBrace !== -1;
+            
+            // キーワードのチェック
+            if (remainingText.startsWith("import") && (remainingText[6] === ' ' || remainingText[6] === undefined)) {
+              className = "keyword";
+              charToAdd = "import";
+              charsToSkip = 6;
+            } else if (remainingText.startsWith("from") && (remainingText[4] === ' ' || remainingText[4] === undefined)) {
+              className = "keyword";
+              charToAdd = "from";
+              charsToSkip = 4;
+            } else if (charToAdd === '"' || charToAdd === "'" || (charIndex > current.text.indexOf('"') && charIndex < current.text.lastIndexOf('"'))) {
+              className = "string";
+            } else if (charToAdd === '{' || charToAdd === '}') {
+              className = "yellow";
+            } else if (charToAdd === '(' || charToAdd === ')') {
+              className = "bracket";
+            } else if (isInBraces && charToAdd.match(/[a-zA-Z]/)) {
+              // {}内のアルファベットは水色
+              className = "import-item";
+            }
+            
+            currentLineEl.innerHTML += `<span class='${className}'>${charToAdd}</span>`;
+            charIndex += charsToSkip;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "function") {
+          // 関数定義の処理
+          if (charIndex < current.text.length) {
+            const remainingText = current.text.substring(charIndex);
+            let className = "text";
+            let charToAdd = remainingText[0];
+            let charsToSkip = 1;
+            
+            // キーワードのチェック
+            if (remainingText.startsWith("export") && (remainingText[6] === ' ' || remainingText[6] === undefined)) {
+              className = "keyword";
+              charToAdd = "export";
+              charsToSkip = 6;
+            } else if (remainingText.startsWith("function") && (remainingText[8] === ' ' || remainingText[8] === undefined)) {
+              className = "function-name";
+              charToAdd = "function";
+              charsToSkip = 8;
+            } else if (remainingText.startsWith("return") && (remainingText[6] === ' ' || remainingText[6] === undefined)) {
+              className = "keyword";
+              charToAdd = "return";
+              charsToSkip = 6;
+            } else if (remainingText.startsWith("Profile") && (remainingText[7] === '(' || remainingText[7] === undefined)) {
+              className = "light-yellow";
+              charToAdd = "Profile";
+              charsToSkip = 7;
+            } else if (charToAdd === '(' || charToAdd === ')') {
+              // Profile()の括弧かチェック
+              if (current.text.includes("Profile()")) {
+                className = "yellow";
+              } else {
+                className = "bracket";
+              }
+            } else if (charToAdd === '{' || charToAdd === '}') {
+              // Profile関数の中括弧かチェック（開始と終了の両方）
+              if (current.text.includes("Profile()") || current.text === "};") {
+                className = "yellow";
+              } else {
+                className = "bracket";
+              }
+            }
+            
+            currentLineEl.innerHTML += `<span class='${className}'>${charToAdd}</span>`;
+            charIndex += charsToSkip;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "comment") {
+          // コメントの処理
+          if (charIndex === 0) {
+            // インデントを一度に表示
+            currentLineEl.innerHTML = `<span class='bracket'>&nbsp;&nbsp;</span>`;
+            charIndex = 1;
+          } else if (charIndex - 1 < current.text.length) {
+            const textChar = current.text[charIndex - 1];
+            currentLineEl.innerHTML += `<span class='comment'>${textChar}</span>`;
+            charIndex++;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "self-closing") {
+          // 自己終了タグの処理
+          if (charIndex === 0) {
+            // インデントを一度に表示
+            currentLineEl.innerHTML = `<span class='bracket'>&nbsp;&nbsp;</span>`;
+            charIndex = 1;
+          } else if (charIndex - 1 < `<${current.tag} ${current.attr} />`.length) {
+            const tagText = `<${current.tag} ${current.attr} />`;
+            const textChar = tagText[charIndex - 1];
+            let className = "bracket";
+            if (textChar === '<' || textChar === '>' || textChar === '/') {
+              className = "tag";
+            } else if (textChar === '"' || (charIndex > tagText.indexOf('"') && charIndex < tagText.lastIndexOf('"'))) {
+              className = "string";
+            } else if (textChar.match(/[a-zA-Z]/)) {
+              className = "tag";
+            } else if (textChar === '=') {
+              className = "bracket";
+            }
+            
+            currentLineEl.innerHTML += `<span class='${className}'>${textChar}</span>`;
+            charIndex++;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "container") {
+          // コンテナタグ（開始タグのみ）の処理
+          if (charIndex === 0) {
+            // インデントを一度に表示
+            currentLineEl.innerHTML = `<span class='bracket'>&nbsp;&nbsp;</span>`;
+            charIndex = 1;
+          } else if (charIndex - 1 < `<${current.tag}>`.length) {
+            const tagText = `<${current.tag}>`;
+            const textChar = tagText[charIndex - 1];
+            const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+            let className = "bracket";
+            if (textChar === '<' || textChar === '>') {
+              className = "tag";
+            } else if (textChar.match(/[a-zA-Z]/)) {
+              // コンポーネントタグ名かどうかをチェック
+              if (componentTags.includes(current.tag)) {
+                className = "component-tag";
+              } else {
+                className = "tag";
+              }
+            }
+            
+            currentLineEl.innerHTML += `<span class='${className}'>${textChar}</span>`;
+            charIndex++;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "multiline") {
+          // 複数行テキストの処理
+          if (multilineIndex === 0) {
+            // 開始タグを表示
+            const indent = "&nbsp;&nbsp;";
+            const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+            const tagClass = componentTags.includes(current.tag) ? 'component-tag' : 'tag';
+            currentLineEl.innerHTML = 
+              `<span class='bracket'>${indent}</span><span class='tag'>&lt;</span><span class='${tagClass}'>${current.tag}</span><span class='tag'>&gt;</span>`;
+            multilineIndex = 1;
+            charIndex = 0;                // 次の行に移動
+            setTimeout(() => {
+              createNewLine();
+            }, 30);
+            return;
+          } else if (multilineIndex <= current.lines.length) {
+            // テキスト行を入力
+            const currentLine = current.lines[multilineIndex - 1];
+            if (charIndex === 0) {
+              // インデント部分を一気に表示
+              let indentEnd = 0;
+              while (indentEnd < currentLine.length && currentLine.substring(indentEnd, indentEnd + 6) === "&nbsp;") {
+                indentEnd += 6;
+              }
+              
+              let formattedLine = "";
+              let i = 0;
+              // インデントを一気に追加
+              while (i < indentEnd) {
+                formattedLine += "&nbsp;";
+                i += 6;
+              }
+              currentLineEl.innerHTML = formattedLine;
+              charIndex = indentEnd + 1;
+            } else if (charIndex - 1 < currentLine.length) {
+              // インデント以降を1文字ずつタイピング
+              let formattedLine = "";
+              let i = 0;
+              while (i < charIndex) {
+                const char = currentLine[i];
+                if (currentLine.substring(i, i + 6) === "&nbsp;") {
+                  formattedLine += "&nbsp;";
+                  i += 6;
+                } else if (char === '<' || char === '>' || char === '/') {
+                  formattedLine += `<span class='tag'>${char}</span>`;
+                  i++;
+                } else if (char.match(/[a-zA-Z]/) && currentLine.substring(i).match(/^(br)/)) {
+                  // brタグを青色にする
+                  formattedLine += `<span class='html-element'>br</span>`;
+                  i += 2;
+                } else {
+                  formattedLine += `<span class='text'>${char}</span>`;
+                  i++;
+                }
+              }
+              currentLineEl.innerHTML = formattedLine;
+              charIndex++;
+            } else {
+              // 現在の行が完了
+              charIndex = 0;
+              multilineIndex++;
+              if (multilineIndex <= current.lines.length) {
+                // 次の行に移動
+                setTimeout(() => {
+                  createNewLine();
+                }, 30);
+                return;
+              } else {
+                // 全ての行が完了、終了タグを表示
+                const indent = "&nbsp;&nbsp;";
+                currentLineEl.innerHTML = `<span class='bracket'>${indent}</span><span class='tag'>&lt;/${current.tag}&gt;</span>`;
+                
+                multilineIndex = 0;
+                lineIndex++;
+                
+                if (lineIndex < jsxLines.length) {
+                  createNewLine();
+                  return;
+                }
+              }
+            }
+          }
+        } else if (current.type === "indent" || current.type === "double-indent" || current.type === "triple-indent" || current.type === "quad-indent") {
+          const indent = getIndent(current.type);
+          
+          if (current.tagType === "comment") {
+            // コメントの処理
+            if (charIndex === 0) {
+              currentLineEl.innerHTML = `<span class='bracket'>${indent}</span>`;
+              charIndex = 1;
+            } else if (charIndex - 1 < current.text.length) {
+              const textChar = current.text[charIndex - 1];
+              let className = "comment";
+              let displayChar = textChar;
+              // JSXコメントの{と}を青色にする
+              if (textChar === '{' || textChar === '}') {
+                className = "function-name";
+              } else if (textChar === ' ') {
+                // スペースを&nbsp;として表示
+                displayChar = "&nbsp;";
+              }
+              currentLineEl.innerHTML += `<span class='${className}'>${displayChar}</span>`;
+              charIndex++;
+            } else {
+              charIndex = 0;
+              lineIndex++;
+              if (lineIndex < jsxLines.length) {
+                createNewLine();
+                return;
+              }
+            }
+          } else if (current.tagType === "self-closing") {
+            // 自己終了タグの処理
+            if (charIndex === 0) {
+              currentLineEl.innerHTML = `<span class='bracket'>${indent}</span>`;
+              charIndex = 1;
+            } else if (charIndex - 1 < `<${current.tag} ${current.attr} />`.length) {
+              const tagText = `<${current.tag} ${current.attr} />`;
+              const textChar = tagText[charIndex - 1];
+              const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+              let className = "bracket";
+              
+              // 文字列の範囲を正確に判定
+              const firstQuote = tagText.indexOf('"');
+              const lastQuote = tagText.lastIndexOf('"');
+              const isInString = firstQuote !== -1 && lastQuote !== -1 && charIndex - 1 > firstQuote && charIndex - 1 < lastQuote;
+              
+              if (textChar === '<' || textChar === '>' || textChar === '/') {
+                className = "tag";
+              } else if (textChar === '"') {
+                className = "string";
+              } else if (isInString) {
+                className = "string";
+              } else if (textChar.match(/[a-zA-Z]/) && !isInString) {
+                // 属性名（src等）をチェック
+                const remainingText = tagText.substring(charIndex - 1);
+                const attrMatch = remainingText.match(/^([a-zA-Z]+)=/);
+                if (attrMatch && ['src'].includes(attrMatch[1])) {
+                  // 属性名全体を一度に青色で表示
+                  className = "html-element";
+                  const attrName = attrMatch[1];
+                  currentLineEl.innerHTML += `<span class='${className}'>${attrName}</span>`;
+                  charIndex += attrName.length;
+                  setTimeout(typeJSX, 30);
+                  return;
+                } else if (componentTags.includes(current.tag)) {
+                  className = "component-tag";
+                } else {
+                  className = "tag";
+                }
+              } else if (textChar === '=') {
+                className = "bracket";
+              }
+              currentLineEl.innerHTML += `<span class='${className}'>${textChar}</span>`;
+              charIndex++;
+            } else {
+              charIndex = 0;
+              lineIndex++;
+              if (lineIndex < jsxLines.length) {
+                createNewLine();
+                return;
+              }
+            }
+          } else if (current.tagType === "container") {
+            // コンテナタグの処理
+            if (charIndex === 0) {
+              currentLineEl.innerHTML = `<span class='bracket'>${indent}</span>`;
+              charIndex = 1;
+            } else if (charIndex - 1 < `<${current.tag}>`.length) {
+              const tagText = `<${current.tag}>`;
+              const textChar = tagText[charIndex - 1];
+              const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+              let className = "bracket";
+              if (textChar === '<' || textChar === '>') {
+                className = "tag";
+              } else if (textChar.match(/[a-zA-Z]/)) {
+                // コンポーネントタグ名かどうかをチェック
+                if (componentTags.includes(current.tag)) {
+                  className = "component-tag";
+                } else {
+                  className = "tag";
+                }
+              }
+              currentLineEl.innerHTML += `<span class='${className}'>${textChar}</span>`;
+              charIndex++;
+            } else {
+              charIndex = 0;
+              lineIndex++;
+              if (lineIndex < jsxLines.length) {
+                createNewLine();
+                return;
+              }
+            }
+          } else if (current.tagType === "multiline") {
+            // 複数行テキストの処理
+            if (multilineIndex === 0) {
+              const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+              const tagClass = componentTags.includes(current.tag) ? 'component-tag' : 'tag';
+              currentLineEl.innerHTML = 
+                `<span class='bracket'>${indent}</span><span class='tag'>&lt;</span><span class='${tagClass}'>${current.tag}</span><span class='tag'>&gt;</span>`;
+              multilineIndex = 1;
+              charIndex = 0;
+              setTimeout(() => {
+                createNewLine();
+              }, 30);
+              return;
+            } else if (multilineIndex <= current.lines.length) {
+              const currentLine = current.lines[multilineIndex - 1];
+              if (charIndex === 0) {
+                // インデント部分を一気に表示
+                let indentEnd = 0;
+                while (indentEnd < currentLine.length && currentLine.substring(indentEnd, indentEnd + 6) === "&nbsp;") {
+                  indentEnd += 6;
+                }
+                
+                let formattedLine = "";
+                let i = 0;
+                // インデントを一気に追加
+                while (i < indentEnd) {
+                  formattedLine += "&nbsp;";
+                  i += 6;
+                }
+                currentLineEl.innerHTML = formattedLine;
+                charIndex = indentEnd + 1;
+              } else if (charIndex - 1 < currentLine.length) {
+                // インデント以降を1文字ずつタイピング
+                let formattedLine = "";
+                let i = 0;
+                while (i < charIndex) {
+                  const char = currentLine[i];
+                  if (currentLine.substring(i, i + 6) === "&nbsp;") {
+                    formattedLine += "&nbsp;";
+                    i += 6;
+                  } else if (char === '<' || char === '>' || char === '/') {
+                    formattedLine += `<span class='tag'>${char}</span>`;
+                    i++;
+                  } else if (char.match(/[a-zA-Z]/) && currentLine.substring(i).match(/^(br)/)) {
+                    // brタグを青色にする
+                    formattedLine += `<span class='html-element'>br</span>`;
+                    i += 2;
+                  } else {
+                    formattedLine += `<span class='text'>${char}</span>`;
+                    i++;
+                  }
+                }
+                currentLineEl.innerHTML = formattedLine;
+                charIndex++;
+              } else {
+                charIndex = 0;
+                multilineIndex++;
+                if (multilineIndex <= current.lines.length) {
+                  setTimeout(() => {
+                    createNewLine();
+                  }, 30);
+                  return;
+                } else {
+                  const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+                  const tagClass = componentTags.includes(current.tag) ? 'component-tag' : 'tag';
+                  currentLineEl.innerHTML = `<span class='bracket'>${indent}</span><span class='tag'>&lt;/</span><span class='${tagClass}'>${current.tag}</span><span class='tag'>&gt;</span>`;
+                  multilineIndex = 0;
+                  lineIndex++;
+                  if (lineIndex < jsxLines.length) {
+                    createNewLine();
+                    return;
+                  }
+                }
+              }
+            }
+          } else if (current.tagType === "closing") {
+            // 終了タグの処理
+            if (charIndex === 0) {
+              currentLineEl.innerHTML = `<span class='bracket'>${indent}</span>`;
+              charIndex = 1;
+            } else if (charIndex - 1 < current.text.length) {
+              const textChar = current.text[charIndex - 1];
+              const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+              let className = "bracket";
+              if (textChar === '<' || textChar === '>' || textChar === '/') {
+                className = "tag";
+              } else if (textChar.match(/[a-zA-Z]/)) {
+                // 終了タグ内のタグ名部分かどうかをチェック
+                const tagMatch = current.text.match(/<\/([a-zA-Z]+)>/);
+                if (tagMatch && componentTags.includes(tagMatch[1])) {
+                  className = "component-tag";
+                } else {
+                  className = "tag";
+                }
+              }
+              currentLineEl.innerHTML += `<span class='${className}'>${textChar}</span>`;
+              charIndex++;
+            } else {
+              charIndex = 0;
+              lineIndex++;
+              if (lineIndex < jsxLines.length) {
+                createNewLine();
+                return;
+              }
+            }
+          } else if (current.tag) {
+            // JSXタグの処理（通常のタグ）
+            if (charIndex === 0) {
+              // 開始タグと終了タグを同時に表示
+              const componentTags = ['Address', 'Mail', 'Links', 'Name', 'Code', 'Description', 'Github', 'TwitterX', 'Portfolio', 'Image'];
+              const tagClass = componentTags.includes(current.tag) ? 'component-tag' : 'tag';
+              currentLineEl.innerHTML = 
+                `<span class='bracket'>${indent}</span><span class='tag'>&lt;</span><span class='${tagClass}'>${current.tag}</span><span class='tag'>&gt;</span><span id="cursor-position"></span><span class='tag'>&lt;/</span><span class='${tagClass}'>${current.tag}</span><span class='tag'>&gt;</span>`;
+              charIndex = 1;
+            } else if (charIndex - 1 < current.text.length) {
+              // テキスト入力
+              const cursorPos = currentLineEl.querySelector('#cursor-position');
+              if (cursorPos) {
+                const textChar = current.text[charIndex - 1];
+                const newTextSpan = document.createElement('span');
+                // URLタグの場合は下線付きテキストクラスを使用
+                const urlTags = ['Github', 'TwitterX', 'Portfolio'];
+                newTextSpan.className = urlTags.includes(current.tag) ? 'url-text' : 'text';
+                // スペースを&nbsp;として表示
+                const displayChar = textChar === ' ' ? '&nbsp;' : textChar;
+                newTextSpan.innerHTML = displayChar;
+                cursorPos.parentNode.insertBefore(newTextSpan, cursorPos);
+                
+                // カーソル表示の調整
+                cursorEl.style.display = 'none';
+                cursorPos.style.display = 'inline-block';
+                cursorPos.style.width = '8px';
+                cursorPos.style.height = '1em';
+                cursorPos.style.backgroundColor = '#d4d4d4';
+                cursorPos.style.animation = 'blink 1s step-end infinite';
+                cursorPos.style.verticalAlign = 'bottom';
+                cursorPos.innerHTML = '';
+                charIndex++;
+              }
+            } else {
+              // テキスト入力完了
+              const cursorPos = currentLineEl.querySelector('#cursor-position');
+              if (cursorPos) {
+                cursorPos.remove();
+              }
+              cursorEl.style.display = 'inline-block';
+              
+              charIndex = 0;
+              lineIndex++;
+              
+              if (lineIndex < jsxLines.length) {
+                createNewLine();
+                return;
+              }
+            }
+          } else {
+            // インデント付きテキスト（return文、終了タグなど）
+            if (charIndex === 0) {
+              // インデントとテキスト全体を一度に表示
+              currentLineEl.innerHTML = `<span class='bracket'>${indent}</span>`;
+              charIndex = 1;
+            } else if (charIndex - 1 < current.text.length) {
+              const remainingText = current.text.substring(charIndex - 1);
+              let className = "text";
+              let charToAdd = remainingText[0];
+              let charsToSkip = 1;
+              
+              // returnキーワードのチェック
+              if (remainingText.startsWith("return") && (remainingText[6] === ' ' || remainingText[6] === '(')) {
+                className = "keyword";
+                charToAdd = "return";
+                charsToSkip = 6;
+              } else if (charToAdd === '<' || charToAdd === '>' || charToAdd === '/') {
+                className = "tag";
+              } else if (charToAdd === '(' || charToAdd === ')') {
+                // return関連の括弧かチェック
+                if (current.text.includes("return (") || current.text.includes(");")) {
+                  className = "keyword";
+                } else {
+                  className = "bracket";
+                }
+              }
+              
+              currentLineEl.innerHTML += `<span class='${className}'>${charToAdd}</span>`;
+              charIndex += charsToSkip;
+            } else {
+              charIndex = 0;
+              lineIndex++;
+              
+              if (lineIndex < jsxLines.length) {
+                createNewLine();
+                return;
+              }
+            }
+          }
+        } else if (current.type === "fragment") {
+          // <> の処理
+          if (charIndex === 0) {
+            // インデントと<>を一度に表示
+            currentLineEl.innerHTML = `<span class='bracket'>&nbsp;&nbsp;</span><span class='fragment-tag'>&lt;&gt;</span>`;
+            charIndex = 1;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "double-indent-fragment") {
+          // double-indent <> の処理
+          if (charIndex === 0) {
+            currentLineEl.innerHTML = `<span class='bracket'>&nbsp;&nbsp;&nbsp;&nbsp;</span><span class='fragment-tag'>&lt;&gt;</span>`;
+            charIndex = 1;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        } else if (current.type === "double-indent-fragment-closing") {
+          // double-indent </> の処理（終了フラグメント）
+          if (charIndex === 0) {
+            currentLineEl.innerHTML = `<span class='bracket'>&nbsp;&nbsp;&nbsp;&nbsp;</span><span class='fragment-tag'>&lt;/&gt;</span>`;
+            charIndex = 1;
+          } else {
+            charIndex = 0;
+            lineIndex++;
+            if (lineIndex < jsxLines.length) {
+              createNewLine();
+              return;
+            }
+          }
+        }
+
+        setTimeout(typeJSX, 30);
+      }
+
+      function createNewLine() {
+        actualLineNumber++; // 実際の行番号を増加
+        const newLineEl = document.createElement("div");
+        newLineEl.className = "line";
+        newLineEl.setAttribute("data-line-number", actualLineNumber);
+        
+        const newTextEl = document.createElement("span");
+        newLineEl.appendChild(newTextEl);
+        newLineEl.appendChild(cursorEl);
+        displayEl.appendChild(newLineEl);
+        
+        currentLineEl = newTextEl;
+        setTimeout(typeJSX, 30);
+      }
+
+      typeJSX();
+    </script>
+  </body>
+</html>
