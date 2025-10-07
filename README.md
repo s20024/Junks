@@ -17,6 +17,12 @@ Apple端末の一覧表示(iPhone)。*iPadも追加予定だが、、、、め�
 
 s20024(やら)の名刺を表示しただけです。w
 
-## [coding-introduction](https://s20024.github.io/Junks/coding-introduction)
+## [Coding Introduction](https://s20024.github.io/Junks/coding-introduction)
 
 なんなんでしょう。。。?
+
+## [ThreeJourny Chapter1](https://s20024.github.io/Junks/three-journy-chapter1/)
+
+Three.js JournyのChapter1を受講し終えての作成。  
+作成時間は1時間程度??  
+Chapter2も受講終わったらその内容を載せていこうかな。
