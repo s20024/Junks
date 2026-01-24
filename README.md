@@ -11,7 +11,7 @@ React と Three.js の練習
 ## [Vue ElementPlus Apple](https://s20024.github.io/Junks/vue-element-apple)
 
 Vue3 と ElementPlus の練習  
-Apple端末の一覧表示(iPhone)。*iPadも追加予定だが、、、、めんどいのでやるかどうかはわからず。
+Apple端末の一覧表示(iPhone)。\*iPadも追加予定だが、、、、めんどいのでやるかどうかはわからず。
 
 ## [Business Card](https://s20024.github.io/Junks/business-card)
 
@@ -26,3 +26,7 @@ s20024(やら)の名刺を表示しただけです。w
 Three.js JournyのChapter1を受講し終えての作成。  
 作成時間は1時間程度??  
 Chapter2も受講終わったらその内容を載せていこうかな。
+
+## [FigmaMake 001](https://s20024.github.io/Junks/figmamake-001/)
+
+FigmaMakeを利用したWebサイトの作成練習。
