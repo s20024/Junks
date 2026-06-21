@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/Junks/portfolio-2025/static/css/main.9e58aaff.css",
+    "main.js": "/Junks/portfolio-2025/static/js/main.711de174.js",
+    "static/js/453.1407b060.chunk.js": "/Junks/portfolio-2025/static/js/453.1407b060.chunk.js",
+    "index.html": "/Junks/portfolio-2025/index.html",
+    "main.9e58aaff.css.map": "/Junks/portfolio-2025/static/css/main.9e58aaff.css.map",
+    "main.711de174.js.map": "/Junks/portfolio-2025/static/js/main.711de174.js.map",
+    "453.1407b060.chunk.js.map": "/Junks/portfolio-2025/static/js/453.1407b060.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9e58aaff.css",
+    "static/js/main.711de174.js"
+  ]
+}

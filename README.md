@@ -30,3 +30,8 @@ Chapter2も受講終わったらその内容を載せていこうかな。
 ## [FigmaMake 001](https://s20024.github.io/Junks/figmamake-001/)
 
 FigmaMakeを利用したWebサイトの作成練習。
+
+## [Portfolio 2025](https://s20024.github.io/Junks/portfolio-2025/)
+
+2025年のポートフォリオになります。2026年のポートフォリオを作成中になります。  
+一応ログとして残しておきたいため、こちらに残しておきます。
