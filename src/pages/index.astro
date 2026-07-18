@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (path: string) => `${base}${path}`;
@@ -14,9 +14,7 @@ const numbered = [...entries]
     ...entry,
     junkNo: `JUNK-${String(i + 1).padStart(3, '0')}`,
     // サムネイルはビルド時に実在チェック。無い間はフォールバック表示
-    hasThumb: existsSync(
-      fileURLToPath(new URL(`../../public${entry.data.thumbnail}`, import.meta.url)),
-    ),
+    hasThumb: existsSync(path.join(process.cwd(), 'public', entry.data.thumbnail)),
   }));
 
 // 表示は date の降順
@@ -37,7 +35,7 @@ const formatDate = (date: Date) =>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="s20024(やら)のジャンク品置き場。動作はする。製品ではない。"
+      content="s20024(やら)のガラクタ置き場。勉強のたびに生まれる残骸たち。"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -51,9 +49,10 @@ const formatDate = (date: Date) =>
     <header class="site-header">
       <h1 class="site-title">Junks</h1>
       <p class="site-desc">
-        s20024(やら)のジャンク品置き場。動作はする。製品ではない。
+        s20024(やら)のガラクタ置き場。勉強のたびに生まれる残骸たち。<br />
+        動作はする。ちゃんとは作っていない。
       </p>
-      <p class="site-meta">在庫 {items.length} 点 / 検品済</p>
+      <p class="site-meta">残骸 {items.length} 点 / 分別予定なし</p>
     </header>
 
     <main>
@@ -62,31 +61,26 @@ const formatDate = (date: Date) =>
           items.map((item) => (
             <li>
               <a class="card" href={withBase(item.data.url)}>
-                <span class="junk-no">{item.junkNo}</span>
                 <div class="thumb">
                   {item.hasThumb ? (
                     <img
                       src={withBase(item.data.thumbnail)}
-                      alt={`${item.data.title} の検品写真`}
+                      alt={`${item.data.title} のスクリーンショット`}
                       loading="lazy"
                     />
                   ) : (
                     <div class="thumb-fallback">
                       <span class="no-photo">NO PHOTO</span>
-                      <span class="no-photo-ja">検品写真なし</span>
+                      <span class="no-photo-ja">写真なし</span>
                     </div>
                   )}
-                  <span class="stamp" aria-hidden="true">
-                    動作確認済
-                    <br />
-                    保証なし
-                  </span>
+                  <span class="tape" aria-hidden="true">{item.junkNo}</span>
                 </div>
                 <h2 class="card-title">{item.data.title}</h2>
                 <p class="card-desc">{item.data.description}</p>
                 <hr class="card-rule" />
                 <p class="card-date">
-                  <span class="card-date-label">製造日</span>
+                  <span class="card-date-label">発生日</span>
                   <time datetime={item.data.date.toISOString().slice(0, 10)}>
                     {formatDate(item.data.date)}
                   </time>
@@ -106,7 +100,7 @@ const formatDate = (date: Date) =>
     </main>
 
     <footer class="site-footer">
-      <p>Junks — 検品済ジャンク品在庫棚</p>
+      <p>Junks — 勉強の残骸置き場</p>
     </footer>
   </body>
 </html>
@@ -119,6 +113,7 @@ const formatDate = (date: Date) =>
     --ink-weak: #6f6a61;
     --line: #d9d3c6;
     --accent: #d0342c;
+    --tape: rgba(228, 220, 198, 0.92);
     --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
       monospace;
     --sans: 'Noto Sans JP', system-ui, sans-serif;
@@ -139,9 +134,9 @@ const formatDate = (date: Date) =>
     color: var(--ink);
     font-family: var(--sans);
     line-height: 1.6;
+    overflow-x: hidden;
   }
 
-  /* ヘッダー: 台帳の表紙 */
   .site-header {
     margin-bottom: 2.5rem;
     padding-bottom: 1.25rem;
@@ -172,7 +167,7 @@ const formatDate = (date: Date) =>
   .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1.75rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -190,25 +185,36 @@ const formatDate = (date: Date) =>
     }
   }
 
-  /* カード: 検品票 */
+  /* カード: 雑に積まれたガラクタ。少しずつ傾いている */
   .card {
     display: block;
     height: 100%;
     padding: 1rem;
     background: var(--card);
     border: 1px solid var(--line);
+    box-shadow: 0 1px 3px rgba(43, 41, 38, 0.08);
     color: inherit;
     text-decoration: none;
+    transform: rotate(var(--tilt, 0deg));
+    transition: transform 0.15s ease;
   }
 
-  .junk-no {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--ink-weak);
+  .grid li:nth-child(4n + 1) .card {
+    --tilt: -0.7deg;
+  }
+  .grid li:nth-child(4n + 2) .card {
+    --tilt: 0.5deg;
+  }
+  .grid li:nth-child(4n + 3) .card {
+    --tilt: -0.4deg;
+  }
+  .grid li:nth-child(4n) .card {
+    --tilt: 0.8deg;
+  }
+
+  /* hover の遊びはこれ1つ: 手に取ると傾きがまっすぐに直る */
+  .card:hover {
+    transform: rotate(0deg);
   }
 
   .thumb {
@@ -216,6 +222,7 @@ const formatDate = (date: Date) =>
     aspect-ratio: 16 / 9;
     border: 1px solid var(--line);
     overflow: visible;
+    background: var(--paper);
   }
 
   .thumb img {
@@ -249,37 +256,24 @@ const formatDate = (date: Date) =>
     color: var(--ink-weak);
   }
 
-  /* スタンプ: 朱色のハンコ。サムネ右上に少し回転させて重ねる */
-  .stamp {
+  /* マスキングテープ風の管理番号ラベル */
+  .tape {
     position: absolute;
-    top: -0.5rem;
-    right: -0.5rem;
-    padding: 0.3rem 0.5rem;
-    border: 2px solid var(--accent);
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.85);
+    top: -0.7rem;
+    left: 50%;
+    padding: 0.15rem 0.9rem;
+    background: var(--tape);
+    box-shadow: 0 1px 2px rgba(43, 41, 38, 0.15);
     color: var(--accent);
     font-family: var(--mono);
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    line-height: 1.5;
-    text-align: center;
-    letter-spacing: 0.1em;
-    opacity: 0.75;
-    transform: rotate(6deg);
-    transition:
-      transform 0.15s ease,
-      opacity 0.15s ease;
-  }
-
-  /* hover の遊びはこれ1つ: スタンプが「押される」 */
-  .card:hover .stamp {
-    opacity: 1;
-    transform: rotate(6deg) scale(0.94);
+    letter-spacing: 0.12em;
+    transform: translateX(-50%) rotate(-2deg);
   }
 
   .card-title {
-    margin: 0.75rem 0 0;
+    margin: 0.85rem 0 0;
     font-size: 1.05rem;
     font-weight: 700;
   }
