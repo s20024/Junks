@@ -1,0 +1,169 @@
+---
+import Pin from './Pin.astro';
+
+// コルクボードにピンで留められたプロジェクト1件分の Card。
+// 傾き・ピンの色・紙の色味・シミは親(一覧側)が CSS 変数で与える:
+//   --tilt / --pin-c / --pin-dark / --pin-x / --card-tint / --stain
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  /** サムネイル画像のURL。無い場合は null でフォールバック表示 */
+  thumbSrc: string | null;
+  date: Date;
+  tags: string[];
+}
+
+const { title, description, href, thumbSrc, date, tags } = Astro.props;
+
+const formatDate = (d: Date) =>
+  [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0'),
+  ].join('-');
+---
+
+<a class="card" href={href}>
+  <Pin />
+  <div class="thumb">
+    {
+      thumbSrc ? (
+        <img src={thumbSrc} alt={`${title} のスクリーンショット`} loading="lazy" />
+      ) : (
+        <div class="thumb-fallback">
+          <span class="no-photo">NO PHOTO</span>
+          <span class="no-photo-ja">写真なし</span>
+        </div>
+      )
+    }
+  </div>
+  <h2 class="card-title">{title}</h2>
+  <p class="card-desc">{description}</p>
+  <hr class="card-rule" />
+  <p class="card-date">
+    <span class="card-date-label">作成日</span>
+    <time datetime={date.toISOString().slice(0, 10)}>{formatDate(date)}</time>
+  </p>
+  {
+    tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((tag) => (
+          <li class="tag">{tag}</li>
+        ))}
+      </ul>
+    )
+  }
+</a>
+
+<style>
+  /* Card: コルクボードにピンで留められた、くたびれた紙 */
+  .card {
+    position: relative;
+    display: block;
+    height: 100%;
+    padding: 1rem;
+    background-color: var(--card-tint, #fffdf6);
+    background-image: var(--stain, none), var(--tex-paper, none);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 5px 12px rgba(61, 41, 20, 0.3),
+      inset 0 0 18px rgba(61, 41, 20, 0.07);
+    color: inherit;
+    text-decoration: none;
+    transform-origin: 50% 0.4rem; /* ピンを中心に傾く */
+    transition: transform 0.1s ease-out;
+  }
+
+  /* hover の遊びはこれ1つ: 触るとピンを支点にカクッと傾く */
+  .card:hover {
+    transform: rotate(var(--tilt, -2deg));
+  }
+
+  .thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line);
+    overflow: visible;
+    background: var(--paper);
+  }
+
+  .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    font-family: var(--mono);
+  }
+
+  .no-photo {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--ink-weak);
+  }
+
+  .no-photo-ja {
+    font-size: 0.7rem;
+    color: var(--ink-weak);
+  }
+
+  .card-title {
+    margin: 0.85rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .card-desc {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--ink-weak);
+  }
+
+  .card-rule {
+    margin: 0.75rem 0;
+    border: 0;
+    border-top: 1px dashed var(--line);
+  }
+
+  .card-date {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+  }
+
+  .card-date-label {
+    margin-right: 0.5rem;
+    color: var(--ink-weak);
+  }
+
+  /* タグ: 部品ラベル */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tag {
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink-weak);
+  }
+</style>

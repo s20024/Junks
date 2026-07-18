@@ -2,41 +2,46 @@
 import { getCollection } from 'astro:content';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import Card from '../components/Card.astro';
+import Pin from '../components/Pin.astro';
+import corkGrainFine from '../assets/textures/cork-grain-fine.svg';
+import corkChips from '../assets/textures/cork-chips.svg';
+import corkMottle from '../assets/textures/cork-mottle.svg';
+import paper from '../assets/textures/paper.svg';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const withBase = (path: string) => `${base}${path}`;
+const withBase = (p: string) => `${base}${p}`;
 
-// 管理番号は date の昇順（古いものが 001）で採番する
+// テクスチャSVGは CSS 変数として <html> に渡し、各所の CSS から参照する
+const textureVars = [
+  `--tex-cork-fine: url('${corkGrainFine.src}')`,
+  `--tex-cork-chips: url('${corkChips.src}')`,
+  `--tex-cork-mottle: url('${corkMottle.src}')`,
+  `--tex-paper: url('${paper.src}')`,
+].join('; ');
+
+// 表示は date の降順
 const entries = await getCollection('junks');
-const numbered = [...entries]
-  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
-  .map((entry, i) => ({
+const items = [...entries]
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((entry) => ({
     ...entry,
-    junkNo: `JUNK-${String(i + 1).padStart(3, '0')}`,
     // サムネイルはビルド時に実在チェック。無い間はフォールバック表示
     hasThumb: existsSync(path.join(process.cwd(), 'public', entry.data.thumbnail)),
   }));
-
-// 表示は date の降順
-const items = [...numbered].reverse();
-
-const formatDate = (date: Date) =>
-  [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, '0'),
-    String(date.getDate()).padStart(2, '0'),
-  ].join('-');
 ---
 
 <!doctype html>
-<html lang="ja">
+<html lang="ja" style={textureVars}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="s20024(やら)のガラクタ置き場。勉強のたびに生まれる残骸たち。"
+      content="s20024(やら)のガラクタ置き場。勉強のために作ったものたちを置いています。"
     />
+    <link rel="icon" href={withBase('/favicon.ico')} sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/logo.svg')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -47,12 +52,24 @@ const formatDate = (date: Date) =>
   </head>
   <body>
     <header class="site-header">
-      <h1 class="site-title">Junks</h1>
-      <p class="site-desc">
-        s20024(やら)のガラクタ置き場。勉強のたびに生まれる残骸たち。<br />
-        動作はする。ちゃんとは作っていない。
-      </p>
-      <p class="site-meta">残骸 {items.length} 点 / 分別予定なし</p>
+      <Pin />
+      <div class="site-heading">
+        <h1 class="site-title">Junks</h1>
+        <div class="site-intro">
+          <p class="site-desc">
+            s20024(やら)のガラクタ置き場。勉強のために作ったものたちを置いています。<br />
+            小さなシンプルな練習作や、不要になったプロジェクトです。
+          </p>
+          <p class="site-meta">全 {items.length} 点</p>
+        </div>
+        <img
+          class="site-logo"
+          src={withBase('/logo.svg')}
+          alt=""
+          width="96"
+          height="96"
+        />
+      </div>
     </header>
 
     <main>
@@ -60,39 +77,14 @@ const formatDate = (date: Date) =>
         {
           items.map((item) => (
             <li>
-              <a class="card" href={withBase(item.data.url)}>
-                <div class="thumb">
-                  {item.hasThumb ? (
-                    <img
-                      src={withBase(item.data.thumbnail)}
-                      alt={`${item.data.title} のスクリーンショット`}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div class="thumb-fallback">
-                      <span class="no-photo">NO PHOTO</span>
-                      <span class="no-photo-ja">写真なし</span>
-                    </div>
-                  )}
-                  <span class="tape" aria-hidden="true">{item.junkNo}</span>
-                </div>
-                <h2 class="card-title">{item.data.title}</h2>
-                <p class="card-desc">{item.data.description}</p>
-                <hr class="card-rule" />
-                <p class="card-date">
-                  <span class="card-date-label">発生日</span>
-                  <time datetime={item.data.date.toISOString().slice(0, 10)}>
-                    {formatDate(item.data.date)}
-                  </time>
-                </p>
-                {item.data.tags.length > 0 && (
-                  <ul class="tags">
-                    {item.data.tags.map((tag) => (
-                      <li class="tag">{tag}</li>
-                    ))}
-                  </ul>
-                )}
-              </a>
+              <Card
+                title={item.data.title}
+                description={item.data.description}
+                href={withBase(item.data.url)}
+                thumbSrc={item.hasThumb ? withBase(item.data.thumbnail) : null}
+                date={item.data.date}
+                tags={item.data.tags}
+              />
             </li>
           ))
         }
@@ -100,7 +92,8 @@ const formatDate = (date: Date) =>
     </main>
 
     <footer class="site-footer">
-      <p>Junks — 勉強の残骸置き場</p>
+      <Pin />
+      <p>Junks — 勉強のために作ったものたちの置き場</p>
     </footer>
   </body>
 </html>
@@ -113,7 +106,7 @@ const formatDate = (date: Date) =>
     --ink-weak: #6f6a61;
     --line: #d9d3c6;
     --accent: #d0342c;
-    --tape: rgba(228, 220, 198, 0.92);
+    --cork: #c49a6d;
     --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
       monospace;
     --sans: 'Noto Sans JP', system-ui, sans-serif;
@@ -124,7 +117,32 @@ const formatDate = (date: Date) =>
   }
 
   html {
-    background: var(--paper);
+    /* コルクボード: 地色 + 細かいノイズ + チップ粒 + 粗いムラ + 濃淡の斑点 */
+    background-color: var(--cork);
+    background-image:
+      var(--tex-cork-fine),
+      var(--tex-cork-chips),
+      var(--tex-cork-mottle),
+      radial-gradient(rgba(255, 244, 222, 0.3) 1.6px, transparent 2.1px),
+      radial-gradient(rgba(97, 64, 32, 0.36) 1.4px, transparent 1.9px),
+      radial-gradient(rgba(72, 45, 20, 0.28) 2.6px, transparent 3.3px),
+      radial-gradient(rgba(255, 240, 214, 0.2) 3px, transparent 3.8px);
+    background-size:
+      180px 180px,
+      220px 220px,
+      260px 260px,
+      15px 15px,
+      22px 22px,
+      57px 57px,
+      73px 73px;
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      0 0,
+      7px 11px,
+      23px 31px,
+      41px 9px;
   }
 
   body {
@@ -137,10 +155,68 @@ const formatDate = (date: Date) =>
     overflow-x: hidden;
   }
 
+  /* ヘッダー: ボードに貼られた案内の紙 */
   .site-header {
+    position: relative;
     margin-bottom: 2.5rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 2px solid var(--ink);
+    padding: 1.5rem 1.75rem 1.25rem;
+    background-color: #fffdf6;
+    background-image: var(--tex-paper);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 5px 12px rgba(61, 41, 20, 0.3),
+      inset 0 0 18px rgba(61, 41, 20, 0.07);
+    transform: rotate(-0.3deg);
+  }
+
+  /* PC: テキスト左・ロゴ右 */
+  .site-heading {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'title logo'
+      'intro logo';
+    align-items: center;
+    column-gap: 1.5rem;
+  }
+
+  .site-title {
+    grid-area: title;
+    align-self: end;
+  }
+
+  .site-intro {
+    grid-area: intro;
+  }
+
+  /* ポンコツロボット。少しだけ傾けてガラクタ感 */
+  .site-logo {
+    grid-area: logo;
+    width: 8.5rem;
+    height: auto;
+    margin-right: 1.25rem;
+    transform: rotate(4deg);
+  }
+
+  /* スマホ: 1行目「ロゴ + タイトル」、2行目に説明(全幅) */
+  @media (max-width: 36rem) {
+    .site-heading {
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        'logo title'
+        'intro intro';
+      column-gap: 1rem;
+      row-gap: 0.5rem;
+    }
+
+    .site-title {
+      align-self: center;
+    }
+
+    .site-logo {
+      width: 4.75rem;
+      margin-right: 0;
+    }
   }
 
   .site-title {
@@ -167,9 +243,9 @@ const formatDate = (date: Date) =>
   .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.75rem;
+    gap: 3.5rem 2rem;
     margin: 0;
-    padding: 0;
+    padding: 0.75rem 0 0;
     list-style: none;
   }
 
@@ -185,148 +261,73 @@ const formatDate = (date: Date) =>
     }
   }
 
-  /* カード: 雑に積まれたガラクタ。少しずつ傾いている */
-  .card {
-    display: block;
-    height: 100%;
-    padding: 1rem;
-    background: var(--card);
-    border: 1px solid var(--line);
-    box-shadow: 0 1px 3px rgba(43, 41, 38, 0.08);
-    color: inherit;
-    text-decoration: none;
-    transform: rotate(var(--tilt, 0deg));
-    transition: transform 0.15s ease;
+  /* hover 時に傾く方向・角度はカードごとに変える(通常時は整列) */
+  .grid li:nth-child(5n + 1) {
+    --tilt: -2.1deg;
+  }
+  .grid li:nth-child(5n + 2) {
+    --tilt: 1.6deg;
+  }
+  .grid li:nth-child(5n + 3) {
+    --tilt: -1.3deg;
+  }
+  .grid li:nth-child(5n + 4) {
+    --tilt: 2.2deg;
+  }
+  .grid li:nth-child(5n) {
+    --tilt: -1.7deg;
   }
 
-  .grid li:nth-child(4n + 1) .card {
-    --tilt: -0.7deg;
+  /* ピンの色と刺す位置、紙の日焼け具合 */
+  .grid li:nth-child(3n + 1) {
+    --pin-c: #d0342c; /* 朱 */
+    --pin-dark: #8c1f19;
+    --card-tint: #fffdf6;
   }
-  .grid li:nth-child(4n + 2) .card {
-    --tilt: 0.5deg;
+  .grid li:nth-child(3n + 2) {
+    --pin-c: #3f6e8c; /* 青 */
+    --pin-dark: #27485d;
+    --card-tint: #fbf5e8;
   }
-  .grid li:nth-child(4n + 3) .card {
-    --tilt: -0.4deg;
-  }
-  .grid li:nth-child(4n) .card {
-    --tilt: 0.8deg;
-  }
-
-  /* hover の遊びはこれ1つ: 手に取ると傾きがまっすぐに直る */
-  .card:hover {
-    transform: rotate(0deg);
-  }
-
-  .thumb {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    border: 1px solid var(--line);
-    overflow: visible;
-    background: var(--paper);
+  .grid li:nth-child(3n) {
+    --pin-c: #c99c27; /* からし */
+    --pin-dark: #8a691a;
+    --card-tint: #f7efdd;
   }
 
-  .thumb img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  /* うっすらシミ */
+  .grid li:nth-child(4n + 2) {
+    --stain: radial-gradient(
+      2rem 1.4rem at 84% 10%,
+      rgba(150, 110, 60, 0.12),
+      transparent 70%
+    );
+  }
+  .grid li:nth-child(4n) {
+    --stain: radial-gradient(
+      2.4rem 1.7rem at 10% 90%,
+      rgba(150, 110, 60, 0.1),
+      transparent 70%
+    );
   }
 
-  .thumb-fallback {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    width: 100%;
-    height: 100%;
-    background: var(--paper);
-    font-family: var(--mono);
-  }
-
-  .no-photo {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    color: var(--ink-weak);
-  }
-
-  .no-photo-ja {
-    font-size: 0.7rem;
-    color: var(--ink-weak);
-  }
-
-  /* マスキングテープ風の管理番号ラベル */
-  .tape {
-    position: absolute;
-    top: -0.7rem;
-    left: 50%;
-    padding: 0.15rem 0.9rem;
-    background: var(--tape);
-    box-shadow: 0 1px 2px rgba(43, 41, 38, 0.15);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    transform: translateX(-50%) rotate(-2deg);
-  }
-
-  .card-title {
-    margin: 0.85rem 0 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-  }
-
-  .card-desc {
-    margin: 0.25rem 0 0;
-    font-size: 0.85rem;
-    color: var(--ink-weak);
-  }
-
-  .card-rule {
-    margin: 0.75rem 0;
-    border: 0;
-    border-top: 1px dashed var(--line);
-  }
-
-  .card-date {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-  }
-
-  .card-date-label {
-    margin-right: 0.5rem;
-    color: var(--ink-weak);
-  }
-
-  /* タグ: 部品ラベル */
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 0.6rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .tag {
-    padding: 0.1rem 0.4rem;
-    border: 1px solid var(--line);
-    background: var(--paper);
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    color: var(--ink-weak);
-  }
-
+  /* フッター: 小さな紙切れ */
   .site-footer {
-    margin-top: 3rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--line);
+    position: relative;
+    width: fit-content;
+    margin: 3.5rem auto 0;
+    padding: 0.6rem 1.2rem;
+    background-color: #fbf5e8;
+    background-image: var(--tex-paper);
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 9px rgba(61, 41, 20, 0.28);
     font-family: var(--mono);
     font-size: 0.7rem;
     color: var(--ink-weak);
+    transform: rotate(0.6deg);
+    --pin-c: #3f6e8c;
+    --pin-dark: #27485d;
+    --pin-size: 0.9rem;
   }
 
   .site-footer p {

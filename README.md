@@ -23,9 +23,9 @@ s20024(やら)の名刺を表示しただけです。w
 
 なんなんでしょう。。。?
 
-## [ThreeJourny Chapter1](https://s20024.github.io/Junks/three-journy-chapter1/)
+## [ThreeJourney Chapter1](https://s20024.github.io/Junks/three-journy-chapter1/)
 
-Three.js JournyのChapter1を受講し終えての作成。  
+Three.js JourneyのChapter1を受講し終えての作成。  
 作成時間は1時間程度??  
 Chapter2も受講終わったらその内容を載せていこうかな。
 
