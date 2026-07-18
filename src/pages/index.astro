@@ -1,0 +1,341 @@
+---
+import { getCollection } from 'astro:content';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const withBase = (path: string) => `${base}${path}`;
+
+// 管理番号は date の昇順（古いものが 001）で採番する
+const entries = await getCollection('junks');
+const numbered = [...entries]
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime())
+  .map((entry, i) => ({
+    ...entry,
+    junkNo: `JUNK-${String(i + 1).padStart(3, '0')}`,
+    // サムネイルはビルド時に実在チェック。無い間はフォールバック表示
+    hasThumb: existsSync(
+      fileURLToPath(new URL(`../../public${entry.data.thumbnail}`, import.meta.url)),
+    ),
+  }));
+
+// 表示は date の降順
+const items = [...numbered].reverse();
+
+const formatDate = (date: Date) =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="s20024(やら)のジャンク品置き場。動作はする。製品ではない。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Junks</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <h1 class="site-title">Junks</h1>
+      <p class="site-desc">
+        s20024(やら)のジャンク品置き場。動作はする。製品ではない。
+      </p>
+      <p class="site-meta">在庫 {items.length} 点 / 検品済</p>
+    </header>
+
+    <main>
+      <ul class="grid">
+        {
+          items.map((item) => (
+            <li>
+              <a class="card" href={withBase(item.data.url)}>
+                <span class="junk-no">{item.junkNo}</span>
+                <div class="thumb">
+                  {item.hasThumb ? (
+                    <img
+                      src={withBase(item.data.thumbnail)}
+                      alt={`${item.data.title} の検品写真`}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="thumb-fallback">
+                      <span class="no-photo">NO PHOTO</span>
+                      <span class="no-photo-ja">検品写真なし</span>
+                    </div>
+                  )}
+                  <span class="stamp" aria-hidden="true">
+                    動作確認済
+                    <br />
+                    保証なし
+                  </span>
+                </div>
+                <h2 class="card-title">{item.data.title}</h2>
+                <p class="card-desc">{item.data.description}</p>
+                <hr class="card-rule" />
+                <p class="card-date">
+                  <span class="card-date-label">製造日</span>
+                  <time datetime={item.data.date.toISOString().slice(0, 10)}>
+                    {formatDate(item.data.date)}
+                  </time>
+                </p>
+                {item.data.tags.length > 0 && (
+                  <ul class="tags">
+                    {item.data.tags.map((tag) => (
+                      <li class="tag">{tag}</li>
+                    ))}
+                  </ul>
+                )}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+
+    <footer class="site-footer">
+      <p>Junks — 検品済ジャンク品在庫棚</p>
+    </footer>
+  </body>
+</html>
+
+<style>
+  :root {
+    --paper: #f4f1ea;
+    --card: #ffffff;
+    --ink: #2b2926;
+    --ink-weak: #6f6a61;
+    --line: #d9d3c6;
+    --accent: #d0342c;
+    --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+      monospace;
+    --sans: 'Noto Sans JP', system-ui, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background: var(--paper);
+  }
+
+  body {
+    margin: 0 auto;
+    padding: 3rem 1.25rem 4rem;
+    max-width: 72rem;
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+
+  /* ヘッダー: 台帳の表紙 */
+  .site-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .site-title {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .site-desc {
+    margin: 0.25rem 0 0;
+    color: var(--ink-weak);
+  }
+
+  .site-meta {
+    margin: 0.75rem 0 0;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink-weak);
+  }
+
+  /* グリッド: PC 3列 / タブレット 2列 / スマホ 1列 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 56rem) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* カード: 検品票 */
+  .card {
+    display: block;
+    height: 100%;
+    padding: 1rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .junk-no {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--ink-weak);
+  }
+
+  .thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line);
+    overflow: visible;
+  }
+
+  .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    height: 100%;
+    background: var(--paper);
+    font-family: var(--mono);
+  }
+
+  .no-photo {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--ink-weak);
+  }
+
+  .no-photo-ja {
+    font-size: 0.7rem;
+    color: var(--ink-weak);
+  }
+
+  /* スタンプ: 朱色のハンコ。サムネ右上に少し回転させて重ねる */
+  .stamp {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    padding: 0.3rem 0.5rem;
+    border: 2px solid var(--accent);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    transform: rotate(6deg);
+    transition:
+      transform 0.15s ease,
+      opacity 0.15s ease;
+  }
+
+  /* hover の遊びはこれ1つ: スタンプが「押される」 */
+  .card:hover .stamp {
+    opacity: 1;
+    transform: rotate(6deg) scale(0.94);
+  }
+
+  .card-title {
+    margin: 0.75rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .card-desc {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--ink-weak);
+  }
+
+  .card-rule {
+    margin: 0.75rem 0;
+    border: 0;
+    border-top: 1px dashed var(--line);
+  }
+
+  .card-date {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+  }
+
+  .card-date-label {
+    margin-right: 0.5rem;
+    color: var(--ink-weak);
+  }
+
+  /* タグ: 部品ラベル */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tag {
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink-weak);
+  }
+
+  .site-footer {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--ink-weak);
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+</style>
