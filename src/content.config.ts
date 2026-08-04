@@ -8,7 +8,7 @@ const junks = defineCollection({
     description: z.string(),
     // public配下のパス。実ファイルが無くても一覧側でフォールバック表示する
     thumbnail: z.string(),
-    // プロジェクト本体へのリンク（base込みで解決すること）
+    // プロジェクト本体へのリンク（相対パスはbase込みで解決、http(s)から始まる場合は外部リンクとしてそのまま使う）
     url: z.string(),
     tags: z.array(z.string()).default([]),
     date: z.coerce.date(),

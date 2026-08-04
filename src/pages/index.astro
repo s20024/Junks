@@ -11,6 +11,8 @@ import paper from '../assets/textures/paper.svg';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const withBase = (p: string) => `${base}${p}`;
+// 外部サイトへの直リンク(http/https)はbaseを付けずそのまま使う
+const resolveUrl = (p: string) => (/^https?:\/\//.test(p) ? p : withBase(p));
 
 // テクスチャSVGは CSS 変数として <html> に渡し、各所の CSS から参照する
 const textureVars = [
@@ -80,7 +82,7 @@ const items = [...entries]
               <Card
                 title={item.data.title}
                 description={item.data.description}
-                href={withBase(item.data.url)}
+                href={resolveUrl(item.data.url)}
                 thumbSrc={item.hasThumb ? withBase(item.data.thumbnail) : null}
                 date={item.data.date}
                 tags={item.data.tags}
