@@ -1,0 +1,236 @@
+[
+    {
+        "title": "PokeShoot",
+        "development": [
+            "React"
+        ],
+        "language": [
+            "html",
+            "css",
+            "javascript"
+        ],
+        "date": "2021-02",
+        "contents": [
+            {
+                "title": "PokeShoot",
+                "sub_title": "ポケモンのシューティングゲーム",
+                "text_first": "学校でのJavaScriptの授業の課題として作成しました。\nこの課題を通して、Reactの基本的な使い方や、WebApiのデータの取得の仕方などを学べました。",
+                "text_second": "このサイトでは、自分と相手のポケモンを選んでシューティングゲームができます。\n詳しくは右「>」をクリックしてください。",
+                "img": "data/images/pokemon/pokemon_all.png",
+                "site": "https://s20024.github.io/pokemon/",
+                "code": "https://github.com/s20024/pokemon/tree/gh-pages"
+            },
+            {
+                "title": "ポケモンバトル",
+                "sub_title": "バトルのやり方...",
+                "text_first": "先に相手のポケモンと自分のポケモンを選択します。\nポケモンを選択した後に「ポケモン登録」「スタート」ボタンをクリックします。",
+                "text_second": "「a,w,d,s」でポケモンを移動して、\n「h」キーで弾を発射します。",
+                "img": "data/images/pokemon/pokemon_battle.gif",
+                "site": "",
+                "code": ""
+            },
+            {
+                "title": "課題",
+                "sub_title": "",
+                "text_first": "当時は、クラスをちゃんと理解していなかったので、クラス作成の部分をもう少し綺麗に描けるようになりたい。",
+                "text_second": "",
+                "img": "data/images/pokemon/pokemon_select.gif",
+                "site": "https://s20024.github.io/pokemon/",
+                "code": "https://github.com/s20024/pokemon/tree/gh-pages"
+            }
+        ]
+    },
+    {
+        "title": "MineSweeper",
+        "development": [
+            "Ubuntu",
+            "Pygame"
+        ],
+        "language": [
+            "python"
+        ],
+        "date": "2021-06",
+        "contents": [
+            {
+                "title": "MineSweeper",
+                "sub_title": "Ubuntu上で動作するマインスイーパー",
+                "text_first": "Guiでのアプリケーションを作成してみたいという理由でPyGameを使用して、マインスイーパーを作成しました。",
+                "text_second": "Ubuntuでは実行できたのですが、Windowsでは動作しなかったです。\nまた、CUIにも対応しています。詳しくは「>」へ。",
+                "img": "data/images/minesweeper/minesweeper_gui.gif",
+                "site": "",
+                "code": "https://github.com/s20024/minesweeper"
+            },
+            {
+                "title": "CUIでのマインスイーパー",
+                "sub_title": "Ubuntuのコンソールで動作するアプリケーションです。",
+                "text_first": "Guiと中身は一緒で、CUIのマインスイーパーも作成しました。",
+                "text_second": "Guiとは違い、右クリックがないので、旗機能がありません。",
+                "img": "data/images/minesweeper/minesweeper_cui.gif",
+                "site": "",
+                "code": "https://github.com/s20024/minesweeper"
+            }
+        ]
+    },
+    {
+        "title": "ITCO",
+        "development": [
+            "Web browser"
+        ],
+        "language": [
+            "html",
+            "css"
+        ],
+        "date": "2020-08",
+        "contents": [
+            {
+                "title": "IT College Okinawa",
+                "sub_title": "学校のホームページを自分なりにデザインして見たもの",
+                "text_first": "Htmlの授業の課題として、学校のホームページを作ってみようという課題が出された時のものです。",
+                "text_second": "今までデザインに関してあまり興味がなかったが、この課題を通して、デザインやサイトの見やすさがとても重要ということを学びました。",
+                "img": "data/images/webextension/webextension_all.png",
+                "site": "https://s20024.github.io/WebExtention/Task01/index.html",
+                "code": "https://github.com/s20024/WebExtention/tree/master/Task01"
+            }
+        ]
+    },
+    {
+        "title": "PiyoCS",
+        "development": [
+            "React"
+        ],
+        "language": [
+            "html",
+            "css",
+            "javascript"
+        ],
+        "date": "2022-01",
+        "contents": [
+            {
+                "title": "PiyoCS",
+                "sub_title": "PiyoPiyoCheatSheet",
+                "text_first": "2年生の課題研究で作成したサイトです。\nいろいろ変更があり、デザインなどが今と異なる場合があります。",
+                "text_second": "学校での課題研究ということで、初心者プログラマや後輩に向けてのアプリになります。詳しくは「>」をクリック",
+                "img": "data/images/piyocs/piyocs.png",
+                "site": "https://s20016.github.io/PiyoCS/",
+                "code": ""
+            },
+            {
+                "title": "使用方法",
+                "sub_title": "",
+                "text_first": "実際に使用している画像です。\n言語や使用したいものを選択することで、簡易的な使い方と使った実例、その結果が表示されます。",
+                "text_second": "これからBGM等も追加していきたいという流れです。",
+                "img": "data/images/piyocs/piyocs.gif",
+                "site": "https://s20016.github.io/PiyoCS/",
+                "code": ""
+            }
+        ]
+    },
+    {
+        "title": "Quiz",
+        "development": [
+            "Android Studio"
+        ],
+        "language": [
+            "kotlin"
+        ],
+        "date": "2021-10",
+        "contents": [
+            {
+                "title": "Quiz",
+                "sub_title": "アンドロイドスタジオでのアプリ作成",
+                "text_first": "AndroidStudioでの課題で作成したアプリケーションです。\nスマホアプリということで、ボタンや画像の配置や見やすさを意識しました。",
+                "text_second": "この課題で、クラスを作成やKotlin特有のコードの書き方など学べました。Version2については「>」をクリック",
+                "img": "data/images/quiz/quiz_one.gif",
+                "site": "",
+                "code": "https://github.com/s20024/Quiz"
+            },
+            {
+                "title": "Quiz2",
+                "sub_title": "先ほどのアプリのVersion2です。",
+                "text_first": "WebApiからのデータを取得して、そのデータで問題を表示するアプリケーションです。",
+                "text_second": "こちらのアプリでは、SQLiteのデータベースを使用しています。またバージョン管理等も実装して見ました。",
+                "img": "data/images/quiz/quiz_two.gif",
+                "site": "",
+                "code": "https://github.com/s20024/Quiz2"
+            }
+        ]
+    },
+    {
+        "title": "BattleApp",
+        "development": [
+            "Android Studio"
+        ],
+        "language": [
+            "kotlin"
+        ],
+        "date": "2021-11",
+        "contents": [
+            {
+                "title": "BattleApp",
+                "sub_title": "ゲームアプリの作成",
+                "text_first": "AndroidStudioでのゲームアプリに取り組んでいます。\n今はまだ作成中なので完成次第、コードを載せようと思います。",
+                "text_second": "このアプリ作成で、簡易的なゲームプログラム、当たり判定などの計算方法や処理が速くなる方法などを学べました。",
+                "img": "data/images/battleapp/battle.gif",
+                "site": "",
+                "code": ""
+            }
+        ]
+    },
+    {
+        "title": "Portfolio",
+        "development": [
+            "React"
+        ],
+        "language": [
+            "html",
+            "css",
+            "javascript"
+        ],
+        "date": "2022-01",
+        "contents": [
+            {
+                "title": "Portfolio",
+                "sub_title": "このサイトです。",
+                "text_first": "最近の自分のプログラムの基盤として、「データ量が増えても大丈夫なプログラム」という考えを取り入れています。",
+                "text_second": "このPortfolioでもgithubからデータを取得し、データ量が変わっても\nプログラムを書き換えないで済むように設計しました。",
+                "img": "data/images/portfolio/portfolio.png",
+                "site": "",
+                "code": "https://github.com/s20024/Portfolio"
+            },
+            {
+                "title": "初期デザイン",
+                "sub_title": "初期のデザイン",
+                "text_first": "ポートフォリオということで、見やすさが大切かなと思い、初めてデザインから作成しました。",
+                "text_second": "こちらの画像は「Lunacy」というデザインアプリで作成しました。",
+                "img": "data/images/portfolio/design.png",
+                "site": "",
+                "code": "https://github.com/s20024/Portfolio"
+            }
+        ]
+    },
+    {
+        "title": "Unko Channel",
+        "development": [
+            "Web Storm",
+            "MongoDB",
+            "Express"
+        ],
+        "language": [
+            "css",
+            "javascript",
+            "ejs"
+        ],
+        "date": "2022-02",
+        "contents": [
+            {
+                "title": "Unko Channel",
+                "sub_title": "チャンネルの名前が思いつきませんでした。",
+                "text_first": "JavaScriptのExpressを使用し、サーバーサイドのプログラムを書いてみました。\n掲示板サイトのような動きをします。",
+                "text_second": "ユーザー認証からデータベースの使用、Ejsの使用など、さまざまな技術を追加し、その勉強することができました。",
+                "img": "data/images/unkochannel/unkochannel.png",
+                "site": "",
+                "code": "https://github.com/s20024/UnkoChannel2"
+            }
+        ]
+    }
+]
